@@ -1,0 +1,10 @@
+torch
+torchvision
+ftfy
+regex
+git+https://github.com/openai/CLIP.git
+Pillow
+numpy
+matplotlib
+mlflow
+ninja

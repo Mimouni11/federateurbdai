@@ -1,0 +1,10 @@
+venv/
+vendor/
+checkpoints/*.pkl
+mlruns/
+mlflow.db
+outputs/
+__pycache__/
+*.pyc
+*.pth
+.cache/
