@@ -6,7 +6,7 @@ import pickle
 
 import torch
 
-from utils.config import STYLEGAN_DIR, CHECKPOINT_PATH, USE_FP16
+from stylegan.config import STYLEGAN_DIR, CHECKPOINT_PATH, USE_FP16
 
 
 def ensure_stylegan2():
@@ -69,8 +69,13 @@ def load_generator(checkpoint=None, device="cuda", fp16=None):
 
 
 def generate_from_w(G, w):
-    """Generate image from a W vector. Returns [1, 3, H, W] in [0, 1]."""
-    ws = w.unsqueeze(1).repeat(1, G.mapping.num_ws, 1)
+    """Generate image from a W or W+ vector. Returns [1, 3, H, W] in [0, 1]."""
+    if w.ndim == 2:
+        # W-space: [1, 512] -> broadcast to all layers
+        ws = w.unsqueeze(1).repeat(1, G.mapping.num_ws, 1)
+    else:
+        # W+-space: [1, num_ws, 512] -> use per-layer latents directly
+        ws = w
     img = G.synthesis(ws.to(dtype=next(G.parameters()).dtype))
     return (img.clamp(-1, 1) + 1) / 2
 

@@ -5,7 +5,7 @@ import torch.nn.functional as F
 import numpy as np
 from torchvision import transforms, models
 
-from utils.config import CLIP_NORMALIZE_MEAN, CLIP_NORMALIZE_STD
+from stylegan.config import CLIP_NORMALIZE_MEAN, CLIP_NORMALIZE_STD
 
 
 # ── CLIP Similarity (text-image alignment) ──────────────────────────────
@@ -21,11 +21,13 @@ def clip_similarity(image_tensor, text_features, clip_model):
         float similarity score
     """
     normalize = transforms.Normalize(mean=CLIP_NORMALIZE_MEAN, std=CLIP_NORMALIZE_STD)
-    img_224 = F.interpolate(image_tensor.float(), size=(224, 224), mode="bilinear", align_corners=False)
-    img_224 = normalize(img_224).half()
+    clip_input_size = clip_model.visual.input_resolution
+    img_resized = F.interpolate(image_tensor.float(), size=(clip_input_size, clip_input_size), mode="bilinear", align_corners=False)
+    img_resized = normalize(img_resized)
+    dtype = next(clip_model.parameters()).dtype
 
     with torch.no_grad():
-        image_features = clip_model.encode_image(img_224)
+        image_features = clip_model.encode_image(img_resized.to(dtype))
         image_features = image_features / image_features.norm(dim=-1, keepdim=True)
 
     return (image_features * text_features).sum(dim=-1).item()

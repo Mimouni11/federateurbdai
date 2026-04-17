@@ -3,8 +3,11 @@ vendor/
 checkpoints/*.pkl
 mlruns/
 mlflow.db
-outputs/
+stylegan/outputs/
+stylegan/celebrity_db/
+stylegan/inputs/
 __pycache__/
 *.pyc
 *.pth
 .cache/
+.env
