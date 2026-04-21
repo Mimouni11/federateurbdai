@@ -11,3 +11,5 @@ __pycache__/
 *.pth
 .cache/
 .env
+deepfake-detector-main/
+*.pdf
