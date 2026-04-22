@@ -1,3 +1,4 @@
+# Shared / StyleGAN + SDXL
 torch
 torchvision
 ftfy
@@ -8,3 +9,18 @@ numpy
 matplotlib
 mlflow
 ninja
+
+# Deepfake detector (model + training)
+albumentations
+grad-cam
+scikit-learn
+seaborn
+opencv-python-headless
+
+# API / Streamlit / tests
+fastapi
+uvicorn
+python-multipart
+streamlit
+requests
+pytest

@@ -5,8 +5,8 @@ import mlflow
 import mlflow.pytorch
 from sklearn.metrics import roc_auc_score, confusion_matrix
 import numpy as np
-from src.model import build_model
-from src.dataset import DeepfakeDataset
+from deepfake_detector.model import build_model
+from data.dataset import DeepfakeDataset
 
 EPOCHS     = 8
 BATCH_SIZE = 32

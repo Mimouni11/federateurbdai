@@ -5,8 +5,8 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from torchvision import transforms
 from PIL import Image, UnidentifiedImageError
-from src.model import build_model
-from src.gradcam import get_gradcam_image
+from deepfake_detector.model import build_model
+from deepfake_detector.gradcam import get_gradcam_image
 
 app = FastAPI(title="Deepfake Detector API")
 
