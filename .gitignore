@@ -6,6 +6,7 @@ mlflow.db
 stylegan/outputs/
 stylegan/celebrity_db/
 stylegan/inputs/
+SDXL/outputs/
 __pycache__/
 *.pyc
 *.pth
