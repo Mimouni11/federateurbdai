@@ -9,6 +9,8 @@ RUN apt-get update && apt-get install -y \
 
 COPY requirements-docker.txt .
 RUN pip install --no-cache-dir -r requirements-docker.txt
-COPY . .
+COPY api/ ./api/
+COPY deepfake_detector/ ./deepfake_detector/
+COPY data/ ./data/
 EXPOSE 8000
 CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
