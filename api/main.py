@@ -1,5 +1,6 @@
 import io
 import base64
+from pathlib import Path
 import torch
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,6 +8,8 @@ from torchvision import transforms
 from PIL import Image, UnidentifiedImageError
 from deepfake_detector.model import build_model
 from deepfake_detector.gradcam import get_gradcam_image
+
+MODEL_PATH = Path(__file__).parent.parent / "deepfake_detector" / "model.pt"
 
 app = FastAPI(title="Deepfake Detector API")
 
@@ -21,7 +24,7 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 # Load model once at startup — not on every request
 model = build_model(pretrained=False)
-model.load_state_dict(torch.load("model.pt", map_location=DEVICE))
+model.load_state_dict(torch.load(MODEL_PATH, map_location=DEVICE))
 model.eval().to(DEVICE)
 
 TRANSFORM = transforms.Compose([
