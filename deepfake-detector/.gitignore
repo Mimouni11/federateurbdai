@@ -1,0 +1,15 @@
+﻿.venv/
+venv/
+__pycache__/
+*.pt
+*.pth
+data/
+mlruns/
+.env
+outputs/
+
+outputs/
+
+.dockerignore
+
+mlflow.db
