@@ -1,8 +1,12 @@
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8765";
 
+export type Verdict = "real" | "fake" | "uncertain";
+
 export interface PredictResponse {
-  prediction: "real" | "fake";
+  prediction: Verdict;
   confidence: number;
+  prob_real?: number;
+  logit?: number;
   gradcam_image: string;
 }
 

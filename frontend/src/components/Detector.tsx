@@ -192,36 +192,66 @@ function ErrorBar({ children }: { children: React.ReactNode }) {
 }
 
 function ResultBar({ result }: { result: PredictResponse }) {
-  const isFake = result.prediction === "fake";
   const pct = (result.confidence * 100).toFixed(1);
+  const style = VERDICT_STYLES[result.prediction];
+  const scoreLabel =
+    result.prediction === "uncertain" ? "Proximity to boundary" : "Confidence";
+
   return (
-    <div
-      className={`rounded-xl border-2 p-5 ${
-        isFake ? "border-brand bg-brand-light" : "border-ink bg-white"
-      }`}
-    >
+    <div className={`rounded-xl border-2 p-5 ${style.border} ${style.bg}`}>
       <div className="flex items-center justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
             Prediction
           </p>
-          <p className={`text-3xl font-extrabold ${isFake ? "text-brand" : "text-ink"}`}>
-            {isFake ? "FAKE" : "REAL"}
-          </p>
+          <p className={`text-3xl font-extrabold ${style.text}`}>{style.label}</p>
         </div>
         <div className="text-right">
           <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
-            Confidence
+            {scoreLabel}
           </p>
           <p className="font-mono text-2xl font-bold text-ink">{pct}%</p>
         </div>
       </div>
       <div className="mt-4 h-2 w-full rounded-full bg-neutral-200 overflow-hidden">
         <div
-          className={`h-full ${isFake ? "bg-brand" : "bg-ink"} transition-all`}
+          className={`h-full ${style.bar} transition-all`}
           style={{ width: `${pct}%` }}
         />
       </div>
+      {result.prediction === "uncertain" && result.prob_real !== undefined && (
+        <p className="mt-3 text-xs text-neutral-600">
+          Raw real-ness score:{" "}
+          <span className="font-mono font-semibold">
+            {(result.prob_real * 100).toFixed(1)}%
+          </span>{" "}
+          — falls in the detector's uncertainty band.
+        </p>
+      )}
     </div>
   );
 }
+
+const VERDICT_STYLES = {
+  real: {
+    border: "border-ink",
+    bg: "bg-white",
+    text: "text-ink",
+    bar: "bg-ink",
+    label: "REAL",
+  },
+  fake: {
+    border: "border-brand",
+    bg: "bg-brand-light",
+    text: "text-brand",
+    bar: "bg-brand",
+    label: "FAKE",
+  },
+  uncertain: {
+    border: "border-neutral-300",
+    bg: "bg-neutral-50",
+    text: "text-neutral-600",
+    bar: "bg-neutral-400",
+    label: "UNCERTAIN",
+  },
+} as const;
