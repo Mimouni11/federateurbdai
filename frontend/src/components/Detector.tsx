@@ -192,36 +192,72 @@ function ErrorBar({ children }: { children: React.ReactNode }) {
 }
 
 function ResultBar({ result }: { result: PredictResponse }) {
-  const isFake = result.prediction === "fake";
-  const pct = (result.confidence * 100).toFixed(1);
+  const aiPct = (result.ai_probability * 100).toFixed(1);
+  const style = VERDICT_STYLES[result.prediction];
+  const confBadge = CONFIDENCE_BADGE[result.confidence];
+
   return (
-    <div
-      className={`rounded-xl border-2 p-5 ${
-        isFake ? "border-brand bg-brand-light" : "border-ink bg-white"
-      }`}
-    >
-      <div className="flex items-center justify-between">
+    <div className={`rounded-xl border-2 p-5 ${style.border} ${style.bg}`}>
+      <div className="flex items-start justify-between gap-6">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
-            Prediction
+            Verdict
           </p>
-          <p className={`text-3xl font-extrabold ${isFake ? "text-brand" : "text-ink"}`}>
-            {isFake ? "FAKE" : "REAL"}
+          <p className={`text-3xl font-extrabold ${style.text}`}>{style.label}</p>
+        </div>
+        <div className="text-right">
+          <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
+            AI probability
           </p>
+          <p className="font-mono text-2xl font-bold text-ink">{aiPct}%</p>
         </div>
         <div className="text-right">
           <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
             Confidence
           </p>
-          <p className="font-mono text-2xl font-bold text-ink">{pct}%</p>
+          <span
+            className={`inline-block mt-1 rounded-full px-3 py-1 text-sm font-bold uppercase tracking-wider ${confBadge}`}
+          >
+            {result.confidence}
+          </span>
         </div>
       </div>
       <div className="mt-4 h-2 w-full rounded-full bg-neutral-200 overflow-hidden">
         <div
-          className={`h-full ${isFake ? "bg-brand" : "bg-ink"} transition-all`}
-          style={{ width: `${pct}%` }}
+          className={`h-full ${style.bar} transition-all`}
+          style={{ width: `${aiPct}%` }}
         />
       </div>
     </div>
   );
 }
+
+const CONFIDENCE_BADGE: Record<"high" | "medium" | "low", string> = {
+  high: "bg-ink text-white",
+  medium: "bg-brand text-white",
+  low: "bg-neutral-300 text-neutral-700",
+};
+
+const VERDICT_STYLES = {
+  real: {
+    border: "border-ink",
+    bg: "bg-white",
+    text: "text-ink",
+    bar: "bg-ink",
+    label: "REAL",
+  },
+  fake: {
+    border: "border-brand",
+    bg: "bg-brand-light",
+    text: "text-brand",
+    bar: "bg-brand",
+    label: "FAKE",
+  },
+  uncertain: {
+    border: "border-neutral-300",
+    bg: "bg-neutral-50",
+    text: "text-neutral-600",
+    bar: "bg-neutral-400",
+    label: "UNCERTAIN",
+  },
+} as const;

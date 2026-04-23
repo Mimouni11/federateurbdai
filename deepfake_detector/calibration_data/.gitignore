@@ -1,0 +1,9 @@
+# Don't commit calibration images — each contributor populates their own set.
+# Keep only the folder structure, the README, and this file.
+*
+!.gitignore
+!README.md
+!real/
+!fake/
+!real/.gitkeep
+!fake/.gitkeep
