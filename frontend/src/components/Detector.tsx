@@ -1,7 +1,11 @@
 import { useState, useRef } from "react";
 import { predict, type PredictResponse } from "../api";
 
-export function Detector() {
+interface Props {
+  onHome: () => void;
+}
+
+export function Detector({ onHome }: Props) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [result, setResult] = useState<PredictResponse | null>(null);
   const [loading, setLoading] = useState(false);
@@ -32,7 +36,7 @@ export function Detector() {
 
   return (
     <div className="min-h-full w-full bg-white">
-      <Header />
+      <Header onHome={onHome} />
 
       <main className="mx-auto w-full max-w-5xl px-6 py-10">
         {!previewUrl && (
@@ -86,13 +90,21 @@ export function Detector() {
   );
 }
 
-function Header() {
+function Header({ onHome }: { onHome: () => void }) {
   return (
     <header className="border-b border-neutral-200">
-      <div className="mx-auto flex max-w-5xl items-center gap-3 px-6 py-4">
-        <div className="h-3 w-3 rounded-full bg-brand animate-siren-pulse" />
-        <span className="font-extrabold tracking-tight text-ink">
-          AI <span className="text-brand">FORENSICS</span>
+      <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
+        <button
+          onClick={onHome}
+          className="flex items-center gap-3 transition hover:opacity-70"
+        >
+          <div className="h-3 w-3 rounded-full bg-brand animate-siren-pulse" />
+          <span className="font-extrabold tracking-tight text-ink">
+            AI <span className="text-brand">FORENSICS</span>
+          </span>
+        </button>
+        <span className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
+          Detector
         </span>
       </div>
     </header>
