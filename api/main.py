@@ -58,6 +58,8 @@ async def predict(file: UploadFile = File(...)):
         logit = model(tensor)
         prob  = torch.sigmoid(logit).item()
 
+    print(f"[DEBUG] raw logit={logit.item():.4f}  sigmoid_prob={prob:.4f}  file={file.filename}")
+
     # ImageFolder assigns labels alphabetically: fake=0, real=1
     # sigmoid output = P(real) because model was trained with real=1 as positive
     # High prob → real, Low prob → fake
