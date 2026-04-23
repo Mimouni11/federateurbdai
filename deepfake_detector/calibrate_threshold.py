@@ -53,10 +53,14 @@ TRANSFORM = transforms.Compose([
 
 
 def collect_logits(model, data_dir: Path, device: str):
-    """Run inference on every image in real/ and fake/. Returns (logits, labels)."""
+    """Run inference on every image in real/ and fake/. Returns (logits, labels).
+
+    Label convention: real=0, fake=1. This matches the model's *actual* training
+    polarity (verified empirically: feeding the opposite convention to roc_curve
+    produces AUC 0.40, i.e. below random). So high logit → model says fake.
+    """
     logits, labels = [], []
-    # Label convention (matches training): 1 = real, 0 = fake
-    for cls_name, cls_label in [("real", 1), ("fake", 0)]:
+    for cls_name, cls_label in [("real", 0), ("fake", 1)]:
         cls_dir = data_dir / cls_name
         if not cls_dir.exists():
             raise FileNotFoundError(
@@ -109,8 +113,8 @@ def plot_cm(cm, out_path: Path):
     fig, ax = plt.subplots(figsize=(4, 4))
     sns.heatmap(
         cm, annot=True, fmt="d", cmap="Oranges",
-        xticklabels=["fake", "real"],
-        yticklabels=["fake", "real"],
+        xticklabels=["real", "fake"],
+        yticklabels=["real", "fake"],
         ax=ax,
     )
     ax.set_xlabel("Predicted")
@@ -144,8 +148,9 @@ def main():
 
     print(f"\nCollecting logits from {args.data_dir}/")
     logits, labels = collect_logits(model, args.data_dir, device)
-    n_real = int((labels == 1).sum())
-    n_fake = int((labels == 0).sum())
+    # Label convention here: real=0, fake=1 (matches training, see collect_logits)
+    n_real = int((labels == 0).sum())
+    n_fake = int((labels == 1).sum())
     print(f"\nTotal: {len(logits)} images ({n_real} real, {n_fake} fake)")
 
     threshold, youden_j, (fpr, tpr) = find_best_threshold(logits, labels)
@@ -157,12 +162,13 @@ def main():
     preds = (logits > threshold).astype(int)
     cm = confusion_matrix(labels, preds)
     acc = float((preds == labels).mean())
-    prec_real = float(precision_score(labels, preds, pos_label=1, zero_division=0))
-    rec_real = float(recall_score(labels, preds, pos_label=1, zero_division=0))
-    f1_real = float(f1_score(labels, preds, pos_label=1, zero_division=0))
-    prec_fake = float(precision_score(labels, preds, pos_label=0, zero_division=0))
-    rec_fake = float(recall_score(labels, preds, pos_label=0, zero_division=0))
-    f1_fake = float(f1_score(labels, preds, pos_label=0, zero_division=0))
+    # Labels: 0 = real, 1 = fake (matches training polarity)
+    prec_real = float(precision_score(labels, preds, pos_label=0, zero_division=0))
+    rec_real = float(recall_score(labels, preds, pos_label=0, zero_division=0))
+    f1_real = float(f1_score(labels, preds, pos_label=0, zero_division=0))
+    prec_fake = float(precision_score(labels, preds, pos_label=1, zero_division=0))
+    rec_fake = float(recall_score(labels, preds, pos_label=1, zero_division=0))
+    f1_fake = float(f1_score(labels, preds, pos_label=1, zero_division=0))
     print(f"\nAccuracy at chosen threshold: {acc:.4f}")
     print(f"Real  — P {prec_real:.3f}  R {rec_real:.3f}  F1 {f1_real:.3f}")
     print(f"Fake  — P {prec_fake:.3f}  R {rec_fake:.3f}  F1 {f1_fake:.3f}")

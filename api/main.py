@@ -78,25 +78,36 @@ async def predict(file: UploadFile = File(...)):
     tensor = TRANSFORM(img).unsqueeze(0).to(DEVICE)
 
     with torch.no_grad():
-        logit    = model(tensor).item()
-        prob_real = torch.sigmoid(torch.tensor(logit)).item()
+        logit = model(tensor).item()
 
-    # Three-way verdict using calibrated threshold + uncertainty margin.
-    # Labels: 1 = real, 0 = fake (alphabetical ImageFolder convention from training).
-    if logit > THRESHOLD + MARGIN:
-        label      = "real"
-        confidence = prob_real
-    elif logit < THRESHOLD - MARGIN:
-        label      = "fake"
-        confidence = 1.0 - prob_real
+    # AI probability = calibrated P(fake). Sigmoid on the *centered* logit
+    # (logit - threshold) so 50% aligns with the decision boundary instead of
+    # the model's biased raw sigmoid. 0% = very real, 100% = very fake.
+    centered = logit - THRESHOLD
+    ai_probability = float(torch.sigmoid(torch.tensor(centered)).item())
+
+    # Three-way verdict using the uncertainty band on the logit axis
+    if centered > MARGIN:
+        prediction = "fake"
+    elif centered < -MARGIN:
+        prediction = "real"
     else:
-        label = "uncertain"
-        # Closer to the threshold → more uncertain. Confidence in being
-        # uncertain = 1 at the threshold, 0 at the edge of the margin band.
-        if MARGIN > 0:
-            confidence = 1.0 - min(abs(logit - THRESHOLD) / MARGIN, 1.0)
-        else:
-            confidence = 0.5
+        prediction = "uncertain"
+
+    # Qualitative confidence: how far beyond the uncertainty band are we?
+    # HIGH   = |centered| > 2 × margin  (clearly decided)
+    # MEDIUM = |centered| > 1 × margin  (past the band but not deep)
+    # LOW    = within the band (uncertain zone)
+    if MARGIN > 0:
+        distance_ratio = abs(centered) / MARGIN
+    else:
+        distance_ratio = abs(centered)
+    if distance_ratio > 2.0:
+        confidence = "high"
+    elif distance_ratio > 1.0:
+        confidence = "medium"
+    else:
+        confidence = "low"
 
     gradcam_img = get_gradcam_image(model, img, DEVICE)
     buf = io.BytesIO()
@@ -104,9 +115,9 @@ async def predict(file: UploadFile = File(...)):
     gradcam_b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
 
     return {
-        "prediction":    label,
-        "confidence":    round(confidence, 4),
-        "prob_real":     round(prob_real, 4),
-        "logit":         round(logit, 4),
-        "gradcam_image": gradcam_b64,
+        "prediction":     prediction,
+        "ai_probability": round(ai_probability, 4),
+        "confidence":     confidence,
+        "logit":          round(logit, 4),
+        "gradcam_image":  gradcam_b64,
     }

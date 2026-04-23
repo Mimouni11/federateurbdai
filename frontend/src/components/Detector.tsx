@@ -192,45 +192,51 @@ function ErrorBar({ children }: { children: React.ReactNode }) {
 }
 
 function ResultBar({ result }: { result: PredictResponse }) {
-  const pct = (result.confidence * 100).toFixed(1);
+  const aiPct = (result.ai_probability * 100).toFixed(1);
   const style = VERDICT_STYLES[result.prediction];
-  const scoreLabel =
-    result.prediction === "uncertain" ? "Proximity to boundary" : "Confidence";
+  const confBadge = CONFIDENCE_BADGE[result.confidence];
 
   return (
     <div className={`rounded-xl border-2 p-5 ${style.border} ${style.bg}`}>
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-6">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
-            Prediction
+            Verdict
           </p>
           <p className={`text-3xl font-extrabold ${style.text}`}>{style.label}</p>
         </div>
         <div className="text-right">
           <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
-            {scoreLabel}
+            AI probability
           </p>
-          <p className="font-mono text-2xl font-bold text-ink">{pct}%</p>
+          <p className="font-mono text-2xl font-bold text-ink">{aiPct}%</p>
+        </div>
+        <div className="text-right">
+          <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
+            Confidence
+          </p>
+          <span
+            className={`inline-block mt-1 rounded-full px-3 py-1 text-sm font-bold uppercase tracking-wider ${confBadge}`}
+          >
+            {result.confidence}
+          </span>
         </div>
       </div>
       <div className="mt-4 h-2 w-full rounded-full bg-neutral-200 overflow-hidden">
         <div
           className={`h-full ${style.bar} transition-all`}
-          style={{ width: `${pct}%` }}
+          style={{ width: `${aiPct}%` }}
         />
       </div>
-      {result.prediction === "uncertain" && result.prob_real !== undefined && (
-        <p className="mt-3 text-xs text-neutral-600">
-          Raw real-ness score:{" "}
-          <span className="font-mono font-semibold">
-            {(result.prob_real * 100).toFixed(1)}%
-          </span>{" "}
-          — falls in the detector's uncertainty band.
-        </p>
-      )}
     </div>
   );
 }
+
+const CONFIDENCE_BADGE: Record<"high" | "medium" | "low", string> = {
+  high: "bg-ink text-white",
+  medium: "bg-brand text-white",
+  low: "bg-neutral-300 text-neutral-700",
+};
 
 const VERDICT_STYLES = {
   real: {
