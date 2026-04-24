@@ -61,6 +61,17 @@ def load_generator(checkpoint=None, device="cuda", fp16=None):
     with open(checkpoint, "rb") as f:
         G = pickle.load(f)["G_ema"].to(device).eval()
 
+    if device == "cpu":
+        # Some checkpoints carry internal fp16 block settings even when we do
+        # not explicitly call G.half(). CPU PyTorch cannot run those paths.
+        for module in G.modules():
+            if hasattr(module, "use_fp16"):
+                module.use_fp16 = False
+            if hasattr(module, "channels_last"):
+                module.channels_last = False
+        G = G.float()
+        fp16 = False
+
     if fp16:
         G = G.half()
 

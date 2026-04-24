@@ -1,7 +1,10 @@
-﻿--extra-index-url https://download.pytorch.org/whl/cpu
+--extra-index-url https://download.pytorch.org/whl/cpu
 torch==2.1.0
 torchvision==0.16.0
 numpy==1.26.4
+ftfy
+regex
+git+https://github.com/openai/CLIP.git
 opencv-python-headless==4.8.1.78
 albumentations==1.3.1
 fastapi==0.115.0
@@ -15,6 +18,8 @@ matplotlib==3.7.5
 seaborn==0.13.2
 pandas==2.2.3
 pillow==10.4.0
+lpips
+facenet-pytorch
 requests
 pytest
 httpx

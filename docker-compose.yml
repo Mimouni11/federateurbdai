@@ -13,7 +13,7 @@ services:
       - ./mlflow.db:/app/mlflow.db
       - ./mlruns:/app/mlruns
       - ./mlartifacts:/app/mlartifacts
-    gpus: all
+      - model_cache:/root/.cache
 
   frontend:
     build:
@@ -40,3 +40,6 @@ services:
       --port 5555
       --backend-store-uri sqlite:////mlflow/mlflow.db
       --default-artifact-root file:///mlflow/mlartifacts
+
+volumes:
+  model_cache:

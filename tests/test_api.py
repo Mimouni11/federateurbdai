@@ -26,9 +26,11 @@ def test_predict_valid_image():
     data = response.json()
     assert "prediction"    in data
     assert "confidence"    in data
+    assert "ai_probability" in data
     assert "gradcam_image" in data
-    assert data["prediction"] in ["real", "fake"]
-    assert 0.0 <= data["confidence"] <= 1.0
+    assert data["prediction"] in ["real", "fake", "uncertain"]
+    assert data["confidence"] in ["high", "medium", "low"]
+    assert 0.0 <= data["ai_probability"] <= 1.0
     assert len(data["gradcam_image"]) > 0   # base64 string is not empty
 
 def test_predict_invalid_file_type():
